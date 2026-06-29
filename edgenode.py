@@ -17,7 +17,7 @@ def onmessage(client, userdata,msg):
         print(f"Received JSON data from `{msg.topic}`: {receiveddata}")
         connecting=sqlite3.connect('telemetry.db')
         cursorobj=connecting.cursor()
-        cursorobj.execute("INSERT INTO telemetry (unit_id, timestamp,turbidity, atp, temperature) VALUES (?, ?,?,?,?)", (receiveddata["unit_id"], receiveddata["timestamp"], receiveddata["turbidity"], receiveddata["atp"], receiveddata["temperature"]))
+        cursorobj.execute("INSERT INTO telemetry (unitid, timestamp,turbidity, atp, temperature) VALUES (?, ?,?,?,?)", (receiveddata["unitid"], receiveddata["timestamp"], receiveddata["turbidity"], receiveddata["atp"], receiveddata["temperature"]))
         connecting.commit()
         connecting.close()
     except json.JSONDecodeError:

@@ -6,7 +6,7 @@ import paho.mqtt.client as mqtt
 
 def sensorreading():
     reading = {
-        "unit_id": "trailer_01",
+        "unitid": "trailer01",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "turbidity": random.uniform(0.5, 3.0),
         "atp": random.randint(1, 50),
@@ -16,7 +16,7 @@ def sensorreading():
 
 def badsensorread():
     reading = {
-        "unit_id": "trailer_01",
+        "unitid": "trailer_01",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "turbidity":random.uniform(6.0,12.0),
         "atp":random.randint(200,500),
