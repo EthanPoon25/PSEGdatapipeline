@@ -20,6 +20,7 @@ type sensorData struct {
 func main() {
 	http.HandleFunc("/health", handleHello)
 	http.HandleFunc("/telemetry", handleTelemetry)
+	fmt.Println("Server is starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -30,12 +31,12 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("%d bytes written", wc)
+	fmt.Printf("%d bytes written", wc)
 }
 
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		slog.Error("error writing response")
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -52,6 +53,6 @@ func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	fmt.Println("%+v\n", sensordata)
+	fmt.Printf("%+v\n", sensordata)
 	w.WriteHeader(http.StatusOK)
 }

@@ -7,21 +7,7 @@ brokeradd="localhost"
 port=1883
 topic="trailer_01/sensors/telemetry"
 dbpath="telemetry.db"
-print("Checking database...")
-setup_db = sqlite3.connect(dbpath)
-setup_cursor = setup_db.cursor()
-setup_cursor.execute('''
-    CREATE TABLE IF NOT EXISTS telemetry (
-        unitid TEXT,
-        timestamp TEXT,
-        turbidity REAL,
-        atp REAL,
-        temperature REAL
-    )
-''')
-setup_db.commit()
-setup_db.close()
-print("Database ready!")
+
 
 def onconnect(client, userdata, flags, rc):
     print("Connected with result code: ",rc)
