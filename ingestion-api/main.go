@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"log/slog"
 	"net/http"
+
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 type sensorData struct {
@@ -17,9 +20,22 @@ type sensorData struct {
 	Temperature float64 `json:"temperature"`
 }
 
+var cl *kgo.Client
+
 func main() {
+	var err error
+	seeds := []string{"localhost:9092"}
+	cl, err = kgo.NewClient(kgo.SeedBrokers(seeds...))
+	if err != nil {
+		log.Fatalf("unable to create kafka client: %v", err)
+	}
+	
+	// Ensure the client is closed cleanly on shutdown
+	defer cl.Close()
+
 	http.HandleFunc("/health", handleHello)
 	http.HandleFunc("/telemetry", handleTelemetry)
+	
 	fmt.Println("Server is starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -30,8 +46,7 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 		slog.Error("error writing response", "err", err)
 		return
 	}
-
-	fmt.Printf("%d bytes written", wc)
+	fmt.Printf("%d bytes written\n", wc)
 }
 
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
@@ -40,19 +55,35 @@ func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := io.ReadAll((r.Body))
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		slog.Error("error writing response", "err", err, data)
+		slog.Error("error reading request body", "err", err)
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Validate the JSON
+	var sensordata sensorData
+	if err := json.Unmarshal(data, &sensordata); err != nil {
+		slog.Error("invalid json payload", "err", err)
+		http.Error(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
-	var sensordata sensorData
-	errs := json.Unmarshal(data, &sensordata)
-	if errs != nil {
-		fmt.Println(errs)
-		w.WriteHeader(400)
+	fmt.Printf("Received: %+v\n", sensordata)
+
+	// Produce to Kafka synchronously
+	record := &kgo.Record{Topic: "telemetry", Value: data}
+	ctx := context.Background()
+	
+	if err := cl.ProduceSync(ctx, record).FirstErr(); err != nil {
+		slog.Error("kafka produce error", "err", err)
+		// Tell the client we failed so they can retry later
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%+v\n", sensordata)
+
+	// Only return 200 OK if Kafka successfully accepted the message
 	w.WriteHeader(http.StatusOK)
 }
