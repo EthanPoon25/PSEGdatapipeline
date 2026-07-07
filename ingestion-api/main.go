@@ -33,7 +33,21 @@ func main() {
 	
 	// Ensure the client is closed cleanly on shutdown
 	defer cl.Close()
-	cl, err = pgx.Connect(context.Background(), "postgresql://postgres:greenteams@localhost:5432/postgres?sslmode=disable")
+	db, err = pgx.Connect(context.Background(), "postgresql://postgres:greenteams@localhost:5432/postgres?sslmode=disable")
+	
+	if err != nil {
+		log.Fatalf("unable to connect to database: %v", err)
+	}
+	cli, err = kgo.NewClient(
+        kgo.SeedBrokers(seeds...),
+        kgo.ConsumeTopics("telemetry"),
+        kgo.ConsumerGroup("systemconsumer"))
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Unable to connect to Kafka: %v\n", err)
+        os.Exit(1)
+    }
+    defer cli.Close()
+	defer db.Close(context.Background())
 	http.HandleFunc("/health", handleHello)
 	http.HandleFunc("/telemetry", handleTelemetry)
 	http.HandleFunc("/data",handleData)
