@@ -8,7 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-
+	"github.com/jackc/pgx/v5"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
@@ -21,6 +21,7 @@ type sensorData struct {
 }
 
 var cl *kgo.Client
+var db *pgx.Conn
 
 func main() {
 	var err error
@@ -32,9 +33,10 @@ func main() {
 	
 	// Ensure the client is closed cleanly on shutdown
 	defer cl.Close()
-
+	cl, err = pgx.Connect(context.Background(), "postgresql://postgres:greenteams@localhost:5432/postgres?sslmode=disable")
 	http.HandleFunc("/health", handleHello)
 	http.HandleFunc("/telemetry", handleTelemetry)
+	http.HandleFunc("/data",handleData)
 	
 	fmt.Println("Server is starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -42,6 +44,15 @@ func main() {
 
 func handleHello(w http.ResponseWriter, r *http.Request) {
 	wc, err := w.Write([]byte("Server is running!\n"))
+	if err != nil {
+		slog.Error("error writing response", "err", err)
+		return
+	}
+	fmt.Printf("%d bytes written\n", wc)
+}
+
+func handleData(w http.ResponseWriter, r *http.Request){
+	wc, err := w.Write([]byte("Server is running for data!\n"))
 	if err != nil {
 		slog.Error("error writing response", "err", err)
 		return
