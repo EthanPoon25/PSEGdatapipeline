@@ -26,6 +26,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+  db:
+    image: timescale/timescaledb:latest-pg17
+    container_name: timescaledb
+    hostname: timescaledb
+    environment:
+      - POSTGRES_PASSWORD=XxXxXxXx
+    ports:
+      - "5432:5432" # Added quotes to ensure YAML parses this correctly as a string
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data # Ensures your database survives restarts
 
 volumes:
   kafka-data:
+  timescaledb-data:
