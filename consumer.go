@@ -24,7 +24,7 @@ type telemData struct {
 }
 
 func main() {
-    cl, err := pgx.Connect(context.Background(), "postgresql://postgres:greenteams@localhost:5432/telemetrydata")
+    cl, err := pgx.Connect(context.Background(), "postgresql://postgres:greenteams@localhost:5432/postgres?sslmode=disable")
     if err != nil {
         // Fixed the error print and added the exit!
         fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
