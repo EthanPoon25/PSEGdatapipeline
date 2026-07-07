@@ -73,17 +73,14 @@ func handleTelemetry(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("Received: %+v\n", sensordata)
 
-	// Produce to Kafka synchronously
 	record := &kgo.Record{Topic: "telemetry", Value: data}
 	ctx := context.Background()
 	
 	if err := cl.ProduceSync(ctx, record).FirstErr(); err != nil {
 		slog.Error("kafka produce error", "err", err)
-		// Tell the client we failed so they can retry later
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	// Only return 200 OK if Kafka successfully accepted the message
 	w.WriteHeader(http.StatusOK)
 }

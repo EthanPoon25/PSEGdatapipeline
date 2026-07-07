@@ -31,7 +31,8 @@ services:
     container_name: timescaledb
     hostname: timescaledb
     environment:
-      - POSTGRES_PASSWORD=XxXxXxXx
+      - POSTGRES_PASSWORD=greenteams
+      - POSTGRES_DB=telemetrydata 
     ports:
       - "5432:5432" # Added quotes to ensure YAML parses this correctly as a string
     volumes:
