@@ -65,26 +65,30 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%d bytes written\n", wc)
 }
 
-func handleData(db *sql.DB, []telemd)(sensorData, error){
-	var dat sensorData
-	rows, err := db.Query("SELECT unitid, time, turbidity, atp, temperature FROM telemetry ORDER BY time DESC LIMIT 50")
+func handleData(w http.ResponseWriter, r *http.Request){
+	rows, err := db.Query(r.Context(),"SELECT unitid, time, turbidity, atp, temperature FROM telemetry ORDER BY time DESC LIMIT 50")
 	if err!=nil{
-		return nil, err
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
 	}
 	defer rows.Close()
-	var results []telemd
+	var results []sensorData
 	for rows.Next() {
-        var dat TelemetryData
+        var dat sensorData
         err := rows.Scan(&dat.UnitID, &dat.Timestamp, &dat.Turbidity, &dat.ATP, &dat.Temperature)
         if err != nil {
-            return nil, err
+            http.Error(w, "something went wrong", http.StatusInternalServerError)
+			return
         }
         results = append(results, dat)
     }
 	if err = rows.Err(); err != nil {
-        return nil, err
+        http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
     }
-    return results, nil
+
+    w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
 }
 
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
