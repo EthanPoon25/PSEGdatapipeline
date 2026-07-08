@@ -1,3 +1,4 @@
+
 package main
 
 import (
@@ -22,9 +23,9 @@ type sensorData struct {
 
 var cl *kgo.Client
 var db *pgx.Conn
-w.Header().Set("Access-Control-Allow-Origin", "*")
 
 func main() {
+	
 	var err error
 	seeds := []string{"localhost:9092"}
 	cl, err = kgo.NewClient(kgo.SeedBrokers(seeds...))
@@ -49,6 +50,7 @@ func main() {
 }
 
 func handleHello(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	wc, err := w.Write([]byte("Server is running!\n"))
 	if err != nil {
 		slog.Error("error writing response", "err", err)
@@ -58,6 +60,7 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleData(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	rows, err := db.Query(r.Context(),"SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry ORDER BY timestamp DESC LIMIT 50")
 	if err!=nil{
 		log.Printf("database query error: %v", err)
@@ -87,6 +90,7 @@ func handleData(w http.ResponseWriter, r *http.Request){
 }
 
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return

@@ -79,7 +79,8 @@ export default function App() {
         <div className="sidebar-logo">
           <div className="logo-mark">HG</div>
           <div>
-            <div className="logo-title">HarvestGuard</div>
+            <div className="logo-title">KSU Mobile Lab Interface
+            </div>
             <div className="logo-sub">OS v1.0</div>
           </div>
         </div>
