@@ -22,6 +22,7 @@ type sensorData struct {
 
 var cl *kgo.Client
 var db *pgx.Conn
+w.Header().Set("Access-Control-Allow-Origin", "*")
 
 func main() {
 	var err error
