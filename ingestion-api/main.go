@@ -65,13 +65,26 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%d bytes written\n", wc)
 }
 
-func handleData(w http.ResponseWriter, r *http.Request){
-	wc, err := w.Write([]byte("Server is running for data!\n"))
-	if err != nil {
-		slog.Error("error writing response", "err", err)
-		return
+func handleData(db *sql.DB, []telemd)(sensorData, error){
+	var dat sensorData
+	rows, err := db.Query("SELECT unitid, time, turbidity, atp, temperature FROM telemetry ORDER BY time DESC LIMIT 50")
+	if err!=nil{
+		return nil, err
 	}
-	fmt.Printf("%d bytes written\n", wc)
+	defer rows.Close()
+	var results []telemd
+	for rows.Next() {
+        var dat TelemetryData
+        err := rows.Scan(&dat.UnitID, &dat.Timestamp, &dat.Turbidity, &dat.ATP, &dat.Temperature)
+        if err != nil {
+            return nil, err
+        }
+        results = append(results, dat)
+    }
+	if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return results, nil
 }
 
 func handleTelemetry(w http.ResponseWriter, r *http.Request) {
