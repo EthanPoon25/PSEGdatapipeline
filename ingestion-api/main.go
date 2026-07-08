@@ -57,8 +57,9 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleData(w http.ResponseWriter, r *http.Request){
-	rows, err := db.Query(r.Context(),"SELECT unitid, time, turbidity, atp, temperature FROM telemetry ORDER BY time DESC LIMIT 50")
+	rows, err := db.Query(r.Context(),"SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry ORDER BY timestamp DESC LIMIT 50")
 	if err!=nil{
+		log.Printf("database query error: %v", err)
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -67,14 +68,16 @@ func handleData(w http.ResponseWriter, r *http.Request){
 	for rows.Next() {
         var dat sensorData
         err := rows.Scan(&dat.UnitID, &dat.Timestamp, &dat.Turbidity, &dat.ATP, &dat.Temperature)
-        if err != nil {
-            http.Error(w, "something went wrong", http.StatusInternalServerError)
+        if err!=nil{
+			log.Printf("database query error: %v", err)
+			http.Error(w, "something went wrong", http.StatusInternalServerError)
 			return
-        }
+		}
         results = append(results, dat)
     }
 	if err = rows.Err(); err != nil {
-        http.Error(w, "something went wrong", http.StatusInternalServerError)
+        log.Printf("database query error: %v", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
     }
 
