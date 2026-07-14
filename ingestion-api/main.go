@@ -21,6 +21,12 @@ type sensorData struct {
 	Temperature float64 `json:"temperature"`
 }
 
+type req struct {
+	Command      string  `json:"command"`
+	Amount   string  `json:"timestamp"`
+	Key string `json:"hash"`
+}
+
 var cl *kgo.Client
 var db *pgx.Conn
 
@@ -58,6 +64,8 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("%d bytes written\n", wc)
 }
+
+func handlecommand(w http.ResponseWriter, r *http.Request){}
 
 func handleData(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
