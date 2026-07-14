@@ -22,9 +22,9 @@ type sensorData struct {
 }
 
 type req struct {
-	Command      string  `json:"command"`
-	Amount   string  `json:"timestamp"`
-	Key string `json:"hash"`
+	Command     string  `json:"command"`
+	Amount   	string  `json:"amount"`
+	Key 		string 	`json:"idempotency_key"`
 }
 
 var cl *kgo.Client
@@ -50,6 +50,7 @@ func main() {
 	http.HandleFunc("/health", handleHello)
 	http.HandleFunc("/telemetry", handleTelemetry)
 	http.HandleFunc("/data",handleData)
+	http.HandleFunc("/command",handlecommand)
 	
 	fmt.Println("Server is starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -65,7 +66,29 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%d bytes written\n", wc)
 }
 
-func handlecommand(w http.ResponseWriter, r *http.Request){}
+func handlecommand(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	rows, err := db.Query(r.Context(),"SELECT turbidity FROM telemetry ORDER BY timestamp DESC LIMIT 1")
+	if err!=nil{
+		log.Printf("database query error: %v", err)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+	var turbidity float64
+	rows.Next()
+	rows.Scan(&turbidity)
+	hash := sha256.Sum256([]byte(time.Now().UTC().Format("2006-01-02T15:04")))
+	key := fmt.Sprintf("%x", hash)
+	if turbidity>5.0{
+		json.NewEncoder(w).Encode(req{
+		Command: "INCREASE_CHLORINE",
+		Amount:  "2ppm",
+		Key:     key,
+	})
+	} else{
+		json.NewEncoder(w).Encode(req{Command: "NONE"})
+	}
+}
 
 func handleData(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
