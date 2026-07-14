@@ -20,8 +20,11 @@ def onmessage(client, userdata,msg):
         connecting=sqlite3.connect('telemetry.db')
         cursorobj=connecting.cursor()
         cursorobj.execute("INSERT INTO telemetry (unitid, timestamp,turbidity, atp, temperature) VALUES (?, ?,?,?,?)", (receiveddata["unitid"], receiveddata["timestamp"], receiveddata["turbidity"], receiveddata["atp"], receiveddata["temperature"]))
+        rows = cursor.fetchall()
+        
         connecting.commit()
         connecting.close()
+
         response = requests.post("http://localhost:8080/telemetry", json=receiveddata)
         command = requests.get("http://localhost:8080/command").json()
         if command["command"] =="NONE" or command["idempotency_key"] in keys:
