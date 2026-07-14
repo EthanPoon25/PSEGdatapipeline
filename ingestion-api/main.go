@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"github.com/jackc/pgx/v5"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"crypto/sha256"
+	"time"
 )
 
 type sensorData struct {

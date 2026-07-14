@@ -7,7 +7,7 @@ brokeradd="localhost"
 port=1883
 topic="trailer_01/sensors/telemetry"
 dbpath="telemetry.db"
-
+keys = set()
 
 def onconnect(client, userdata, flags, rc):
     print("Connected with result code: ",rc)
@@ -16,7 +16,6 @@ def onconnect(client, userdata, flags, rc):
 def onmessage(client, userdata,msg):
     try:
         receiveddata=json.loads(msg.payload.decode('utf-8'))
-        print("here")
         print(f"Received JSON data from `{msg.topic}`: {receiveddata}")
         connecting=sqlite3.connect('telemetry.db')
         cursorobj=connecting.cursor()
@@ -24,7 +23,13 @@ def onmessage(client, userdata,msg):
         connecting.commit()
         connecting.close()
         response = requests.post("http://localhost:8080/telemetry", json=receiveddata)
-        print("POST status:", response.status_code)
+        command = requests.get("http://localhost:8080/command").json()
+        if command["command"] =="NONE" or command["idempotency_key"] in keys:
+            print("POST status:", response.status_code)
+        else:
+            print("⚠️ COMMAND RECEIVED: INCREASE_CHLORINE +2ppm — activating Venturi injector")
+            keys.add(command["idempotency_key"])
+
     except json.JSONDecodeError:
         print(f"Received non-JSON message from `{msg.topic}`: {msg.payload.decode()}")
     except KeyError as e:
