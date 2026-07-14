@@ -79,7 +79,7 @@ export default function App() {
         <div className="sidebar-logo">
           <div className="logo-mark">HG</div>
           <div>
-            <div className="logo-title">KSU Mobile Lab Interface
+            <div className="logo-title">Mobile Lab Interface
             </div>
             <div className="logo-sub">OS v1.0</div>
           </div>
@@ -236,7 +236,8 @@ export default function App() {
                 <div className="chart-sub">°F — safe range 34–45°F</div>
               </div>
               <div className="chart-legend">
-                <span className="legend-dot" style={{ background: '#1d9e75' }} />
+                {/* Updated background color here */}
+                <span className="legend-dot" style={{ background: '#5e2b97' }} />
                 <span>°F</span>
               </div>
             </div>
@@ -245,7 +246,8 @@ export default function App() {
                 <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#888' }} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10, fill: '#888' }} />
                 <Tooltip content={<CustomTooltip unit="°F" />} />
-                <Line type="monotone" dataKey="temperature" stroke="#1d9e75" strokeWidth={2} dot={false} />
+                {/* Updated stroke color here */}
+                <Line type="monotone" dataKey="temperature" stroke="#5e2b97" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
