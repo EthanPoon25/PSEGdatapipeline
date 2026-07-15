@@ -36,3 +36,13 @@ def minioupload(filename):
     aws_secret_access_key='minioadmin'
 )
     s3_client.upload_file(filename, "awms", filename)
+
+def runarchive():
+    rowsadd=getreadings()
+    filen=writecsv(rowsadd)
+    minioupload(filen)
+
+while True:
+    schedule.every(24).hours.do(runarchive)
+    schedule.run_pending()
+    time.sleep(60)
