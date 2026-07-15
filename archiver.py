@@ -42,7 +42,9 @@ def runarchive():
     filen=writecsv(rowsadd)
     minioupload(filen)
 
+runarchive()
+schedule.every(24).hours.do(runarchive)
+
 while True:
-    schedule.every(24).hours.do(runarchive)
     schedule.run_pending()
     time.sleep(60)
