@@ -16,14 +16,17 @@ def getreadings():
     cursor = conn.cursor()
     cursor.execute("SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry WHERE timestamp > NOW() - INTERVAL '24 hours'")
     rows = cursor.fetchall()
-    writecsv(rows)
     conn.close()
     return rows
 
 def writecsv(rows):
-    date=datetime.now().strftime("%Y-%m-%d")
-    f = open('/data/', date)
+    date = datetime.now().strftime("%Y-%m-%d")
+    filename = f"data/mobilelab-{date}.csv"
+    f = open(filename, 'w')
     writer=csv.writer(f)
-    writer.writerow(rows)
+    writer.writerow(["unitid", "timestamp", "turbidity", "atp", "temperature"])
+    writer.writerows(rows)
     f.close()
-    return writer
+    return filename
+
+def minioupload(filename):
