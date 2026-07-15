@@ -14,7 +14,7 @@ def getreadings():
     password="greenteams"
     )
     cursor = conn.cursor()
-    cursor.execute("SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry WHERE timestamp > NOW() - INTERVAL '24 hours'")
+    cursor.execute("SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry WHERE timestamp::timestamptz > NOW() - INTERVAL '24 hours'")
     rows = cursor.fetchall()
     conn.close()
     return rows
