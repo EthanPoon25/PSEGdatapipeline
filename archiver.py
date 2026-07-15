@@ -14,11 +14,16 @@ def getreadings():
     password="greenteams"
     )
     cursor = conn.cursor()
-    cursor.execute("rows = SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry WHERE timestamp > NOW() - INTERVAL '24 hours'")
+    cursor.execute("SELECT unitid, timestamp, turbidity, atp, temperature FROM telemetry WHERE timestamp > NOW() - INTERVAL '24 hours'")
     rows = cursor.fetchall()
-    f = open('path/to/csv_file', 'w')
+    writecsv(rows)
+    conn.close()
+    return rows
+
+def writecsv(rows):
+    date=datetime.now().strftime("%Y-%m-%d")
+    f = open('/data/', date)
     writer=csv.writer(f)
     writer.writerow(rows)
     f.close()
-    conn.close()
-    return rows
+    return writer
