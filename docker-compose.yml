@@ -37,7 +37,20 @@ services:
       - "5432:5432" # Added quotes to ensure YAML parses this correctly as a string
     volumes:
       - timescaledb-data:/var/lib/postgresql/data # Ensures your database survives restarts
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
 
 volumes:
   kafka-data:
   timescaledb-data:
+  minio-data:
